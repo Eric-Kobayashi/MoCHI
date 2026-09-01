@@ -3,4 +3,5 @@ include MANIFEST.in
 include CODE_OF_CONDUCT.md
 
 graft pymochi
+graft nextflow
 global-exclude *.py[cod] __pycache__ *.so

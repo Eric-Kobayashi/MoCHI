@@ -27,6 +27,10 @@ dependencies = [
     "wheel",
 ]
 
+[project.scripts]
+pymochi = "pymochi.main:main"
+pymochi-nextflow = "pymochi.bin.run_mochi_nextflow:main"
+
 [tool.setuptools]
 include-package-data = true
 script-files = [
@@ -42,6 +46,19 @@ pymochi = [
     "data/model_design.txt",
     "data/fitness_abundance.txt",
     "data/fitness_binding.txt",
+]
+
+[tool.setuptools.data-files]
+"share/pymochi/nextflow" = [
+    "nextflow/main.nf",
+    "nextflow/nextflow.config",
+]
+"share/pymochi/nextflow/modules" = [
+    "nextflow/modules/parallel_single_gpu.nf",
+]
+"share/pymochi/nextflow/scripts" = [
+    "nextflow/scripts/run_mochi_nextflow.sh",
+    "nextflow/scripts/run_mochi_task.sh",
 ]
 
 [tool.setuptools_scm]

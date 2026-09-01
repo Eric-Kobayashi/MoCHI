@@ -7,6 +7,7 @@ def workflowOnlyParamKeys = [
     "repo_root",
     "mochi_repo",
     "mochi_venv",
+    "mochi_python",
     "output_root",
     "run_name",
     "workflow_mode",
@@ -45,6 +46,7 @@ params.nextflow_root = params.containsKey("nextflow_root") ? params["nextflow_ro
 params.repo_root = params.containsKey("repo_root") ? params["repo_root"] : new File(params.nextflow_root.toString()).getCanonicalFile().getParent()
 params.mochi_repo = paramOr("mochi_repo", "${params.repo_root}")
 params.mochi_venv = paramOr("mochi_venv", "${params.repo_root}/.venv")
+params.mochi_python = paramOr("mochi_python", "${params.mochi_venv}/bin/python")
 params.output_root = paramOr("output_root", paramOr("output_directory", workflow.launchDir.toString()))
 params.run_name = paramOr("run_name", workflow.runName)
 params.workflow_mode = paramOr("workflow_mode", "parallel_folds")
@@ -153,6 +155,7 @@ EOF
     export REPO_ROOT="${params.repo_root}"
     export MOCHI_REPO="${params.mochi_repo}"
     export MOCHI_VENV="${params.mochi_venv}"
+    export PYTHON_BIN="${params.mochi_python}"
     export RUN_LABEL="${runLabel}"
     export OUTPUT_ROOT="${params.output_root}"
     export OUTPUT_DIR="${outputDir}"

@@ -31,13 +31,14 @@ bash bootstrap_mochi_uv.sh
 
 This installs uv if necessary, creates `.venv`, and synchronizes the environment from `pyproject.toml` and `uv.lock`.
 
-The [Bioconda package](http://bioconda.github.io/recipes/pymochi/README.html) remains available for the legacy MoCHI 1.1 release on Python 3.9:
+Bioconda releases provide the `pymochi` command and the local `pymochi-nextflow` workflow launcher:
 
 ```bash
-conda create -n pymochi -c conda-forge -c bioconda pymochi
+conda create -n pymochi -c conda-forge -c bioconda pymochi nextflow=25.10.4
+conda activate pymochi
 ```
 
-It does not install the current source version or its locked environment, so uv is recommended for current development and Nextflow runs.
+The current Bioconda package remains MoCHI 1.1 on Python 3.9 until the 1.2 recipe is merged and published. Use uv for current source development.
 
 # Usage
 
@@ -61,6 +62,14 @@ bash nextflow/scripts/run_mochi_nextflow.sh \
 ```
 
 The default `local` profile runs tasks on the current host. For LSF, set `NEXTFLOW_PROFILE=lsf` and use the LSF master launcher. See [the Nextflow run guide](nextflow/RUN.md) for scheduler configuration, resume instructions, and additional options.
+
+With the Bioconda package, use:
+
+```bash
+pymochi-nextflow \
+    --run_name my-mochi-run \
+    --model_design /path/to/model_design.tsv
+```
 
 ## Direct command line tool
 

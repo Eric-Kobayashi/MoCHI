@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-NEXTFLOW_ROOT="${REPO_ROOT}/nextflow"
+REPO_ROOT="${MOCHI_REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+NEXTFLOW_ROOT="${NEXTFLOW_ROOT:-${REPO_ROOT}/nextflow}"
 NEXTFLOW_BIN="${NEXTFLOW_BIN:-nextflow}"
 MOCHI_VENV="${MOCHI_VENV:-${REPO_ROOT}/.venv}"
+PYTHON_BIN="${PYTHON_BIN:-${MOCHI_VENV}/bin/python}"
 NEXTFLOW_PROFILE="${NEXTFLOW_PROFILE:-local}"
 RESUME="${RESUME:-0}"
 
@@ -36,9 +37,13 @@ if ! command -v "${NEXTFLOW_BIN}" >/dev/null 2>&1; then
     exit 1
 fi
 
-if [ ! -x "${MOCHI_VENV}/bin/python" ]; then
-    echo "MoCHI environment not found at ${MOCHI_VENV}. Run bootstrap_mochi_uv.sh from the MoCHI root first." >&2
+if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1 && [ ! -x "${PYTHON_BIN}" ]; then
+    echo "Python interpreter not found at ${PYTHON_BIN}" >&2
     exit 1
+fi
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    exec "${NEXTFLOW_BIN}" run -help
 fi
 
 RUN_NAME="${RUN_NAME:-$(param_value_from_args run_name "$@")}"
@@ -55,6 +60,7 @@ nextflow_args=(
     --repo_root "${REPO_ROOT}"
     --nextflow_root "${NEXTFLOW_ROOT}"
     --mochi_venv "${MOCHI_VENV}"
+    --mochi_python "${PYTHON_BIN}"
     --output_root "${OUTPUT_ROOT}"
     --run_name "${RUN_NAME}"
     "$@"

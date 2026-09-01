@@ -30,6 +30,7 @@ EOF
     export REPO_ROOT="${params.repo_root}"
     export MOCHI_REPO="${params.mochi_repo}"
     export MOCHI_VENV="${params.mochi_venv}"
+    export PYTHON_BIN="${params.mochi_python}"
     export RUN_LABEL="${opts.runLabel}"
     export OUTPUT_ROOT="${params.output_root}"
     export OUTPUT_DIR="${jobOutputDir}"

@@ -5,7 +5,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 MOCHI_REPO="${MOCHI_REPO:-${REPO_ROOT}}"
 MOCHI_VENV="${MOCHI_VENV:-${MOCHI_REPO}/.venv}"
 PYTHON_BIN="${PYTHON_BIN:-${MOCHI_VENV}/bin/python}"
-MOCHI_ENTRYPOINT="${MOCHI_ENTRYPOINT:-${MOCHI_REPO}/pymochi/bin/run_mochi.py}"
+MOCHI_ENTRYPOINT="${MOCHI_ENTRYPOINT:-}"
 MOCHI_ARGS_FILE="${MOCHI_ARGS_FILE:-}"
 RUN_LABEL="${RUN_LABEL:-mochi_batch_compare}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-/tmp}"
@@ -47,9 +47,8 @@ else
     SCHEDULER_QUEUE="unknown"
 fi
 
-if [ ! -x "${PYTHON_BIN}" ]; then
-    echo "Expected Python interpreter not found at ${PYTHON_BIN}" >&2
-    echo "Run bootstrap_mochi_uv.sh from the MoCHI root first." >&2
+if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1 && [ ! -x "${PYTHON_BIN}" ]; then
+    echo "Python interpreter not found at ${PYTHON_BIN}" >&2
     exit 1
 fi
 
@@ -59,10 +58,11 @@ export PYTHONUNBUFFERED=1
 export UV_CACHE_DIR="${LOCAL_UV_CACHE}"
 export XDG_CACHE_HOME="${LOCAL_UV_CACHE}"
 
-MOCHI_CMD=(
-    "${PYTHON_BIN}"
-    "${MOCHI_ENTRYPOINT}"
-)
+if [ -n "${MOCHI_ENTRYPOINT}" ]; then
+    MOCHI_CMD=("${PYTHON_BIN}" "${MOCHI_ENTRYPOINT}")
+else
+    MOCHI_CMD=("${PYTHON_BIN}" -m pymochi.main)
+fi
 
 if [ -n "${MOCHI_ARGS_FILE}" ]; then
     if [ ! -f "${MOCHI_ARGS_FILE}" ]; then
