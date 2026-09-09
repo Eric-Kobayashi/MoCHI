@@ -24,6 +24,11 @@ PHASE_MANIFEST="${PHASE_MANIFEST:-${OUTPUT_DIR}/phase_manifest.env}"
 MONITOR_INTERVAL_SECONDS="${MONITOR_INTERVAL_SECONDS:-30}"
 
 mkdir -p "${OUTPUT_DIR}" "${LOCAL_UV_CACHE}"
+START_EPOCH="$(date +%s)"
+
+timestamp() {
+    date -u +"%Y-%m-%dT%H:%M:%SZ"
+}
 
 if [ -n "${LSB_JOBID:-}" ]; then
     SCHEDULER="lsf"
@@ -85,7 +90,8 @@ printf '\n' >> "${COMMAND_FILE}"
     echo "queue=${SCHEDULER_QUEUE}"
     echo "host=$(hostname -f || hostname)"
     echo "cwd=$(pwd)"
-    echo "start_time=$(date -Is)"
+    echo "start_time=$(timestamp)"
+    echo "start_epoch=${START_EPOCH}"
     echo "repo_root=${REPO_ROOT}"
     echo "mochi_repo=${MOCHI_REPO}"
     echo "mochi_entrypoint=${MOCHI_ENTRYPOINT}"
@@ -114,7 +120,7 @@ printf '\n' >> "${COMMAND_FILE}"
     echo "COMMAND_FILE=${COMMAND_FILE}"
     echo "PHASE_MANIFEST=${PHASE_MANIFEST}"
     echo "MOCHI_DEVICE=${MOCHI_DEVICE}"
-    echo "START_TIME=$(date -Is)"
+    echo "START_TIME=$(timestamp)"
 } > "${RUN_INFO_FILE}"
 
 {
@@ -125,7 +131,7 @@ printf '\n' >> "${COMMAND_FILE}"
 monitor_resources() {
     while kill -0 "${MOCHI_PID}" 2>/dev/null; do
         {
-            echo "timestamp=$(date -Is)"
+            echo "timestamp=$(timestamp)"
             echo "pid_snapshot:"
             ps -o pid,ppid,%cpu,%mem,rss,vsz,etime,state,cmd -p "${MOCHI_PID}" || true
             if [ -r "/proc/${MOCHI_PID}/status" ]; then
@@ -148,13 +154,13 @@ monitor_resources() {
 }
 
 {
-    echo "[$(date -Is)] Starting MoCHI command"
+    echo "[$(timestamp)] Starting MoCHI command"
     printf '%s\n' "$(sed 's/[[:space:]]*$//' "${COMMAND_FILE}")"
 } >> "${RUN_LOG}"
 
 set +e
 (
-    exec /usr/bin/time -v -o "${TIME_LOG}" "${MOCHI_CMD[@]}" >> "${RUN_LOG}" 2>&1
+    exec /usr/bin/time -p -o "${TIME_LOG}" "${MOCHI_CMD[@]}" >> "${RUN_LOG}" 2>&1
 ) &
 MOCHI_PID=$!
 set -e
@@ -174,9 +180,8 @@ set -e
 kill "${MONITOR_PID}" 2>/dev/null || true
 wait "${MONITOR_PID}" 2>/dev/null || true
 
-END_TIME="$(date -Is)"
+END_TIME="$(timestamp)"
 END_EPOCH="$(date +%s)"
-START_EPOCH="$(date -d "$(awk -F= '/^start_time=/{print $2; exit}' "${JOB_META}")" +%s)"
 ELAPSED_SECONDS="$((END_EPOCH - START_EPOCH))"
 
 {

@@ -8,6 +8,10 @@ MOCHI_VENV="${MOCHI_VENV:-${REPO_ROOT}/.venv}"
 PYTHON_BIN="${PYTHON_BIN:-${MOCHI_VENV}/bin/python}"
 NEXTFLOW_PROFILE="${NEXTFLOW_PROFILE:-local}"
 RESUME="${RESUME:-0}"
+# The workflow config uses legacy dynamic closures. Nextflow 26.04 enables
+# its strict parser by default, so select the compatible parser unless callers
+# have explicitly chosen one.
+export NXF_SYNTAX_PARSER="${NXF_SYNTAX_PARSER:-v1}"
 
 param_value_from_args() {
     local key="${1}"
